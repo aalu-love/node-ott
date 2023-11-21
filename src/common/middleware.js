@@ -4,8 +4,12 @@ require('dotenv').config();
 const requiredSignin = async (req, res, next) => {
 	try {
 		const token = req.headers.authorization.split(' ')[1];
-		const user = await jwt.verify(token, process.env.JWT_SECRET);
-		req.user = user;
+		const { role, username, email } = await jwt.verify(token, process.env.JWT_SECRET);
+		req.user = {
+			role,
+			username,
+			email,
+		};
 		next();
 	} catch (error) {
 		return res.status(500).json({ message: 'Invalid Bearer token or Sign in is required' });
