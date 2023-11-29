@@ -4,6 +4,8 @@ const {
   uploadVideo,
   uploadContent,
   likeContent,
+  getContentDetails,
+  commentContent,
 } = require("../controller/creatorController");
 const { upload } = require("../common/storageInstance");
 // const { SIGNUP_VALIDATOR, LOGIN_VALIDATOR, isRequestValidated } = require('../config/validator');
@@ -24,6 +26,7 @@ const { requiredSignin } = require("../common/middleware");
 //     .json({ message: "File uploaded successfully.", videoPath });
 // });
 
+router.get("/content/:content_id", requiredSignin, getContentDetails);
 router.post("/upload-content", requiredSignin, uploadContent);
 router.post(
   "/upload-video/:content_id",
@@ -32,5 +35,6 @@ router.post(
   uploadVideo
 );
 router.post("/like/:content_id", requiredSignin, likeContent);
+router.post("/comment/:content_id", requiredSignin, commentContent);
 
 module.exports = router;

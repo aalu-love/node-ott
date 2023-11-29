@@ -107,7 +107,19 @@ const likeContent = async (req, res) => {
 const getContentDetails = async (req, res) => {
   try {
     const { content_id } = req.params;
-    const query = "SELECT * FROM content WHERE content_id = ?";
+    await connection.query(
+      "UPDATE content SET viewer_count = viewer_count + 1 WHERE id = ?",
+      [Number(content_id)],
+      (err, result) => {
+        if (err) {
+          console.error("Error in getContentDetails:", err);
+          return res.status(500).json({
+            message: "Internal server error.",
+          });
+        }
+      }
+    );
+    const query = "SELECT * FROM content WHERE id = ?";
     const values = [Number(content_id)];
     await connection.query(query, values, (err, result) => {
       if (err) {
@@ -122,20 +134,32 @@ const getContentDetails = async (req, res) => {
         });
       }
     });
-    await connection.query(
-      "UPDATE content SET viewer_count = viewer_count + 1 WHERE content_id = ?",
-      [Number(content_id)],
-      (err, result) => {
-        if (err) {
-          console.error("Error in getContentDetails:", err);
-          return res.status(500).json({
-            message: "Internal server error.",
-          });
-        }
-      }
-    );
   } catch (err) {
     console.error("Error in getContentDetails:", err);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+const commentContent = async (req, res) => {
+  try {
+    const { content_id } = req.params;
+    const { _id: user_id } = req.user;
+    const { comment, parent_id } = req.body;
+    const query =
+      "INSERT INTO content_comments (user_id, content_id, parent_id, comment) VALUES (?,?,?,?)";
+    const values = [user_id, Number(content_id), parent_id || null, comment];
+    await connection.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error in commentContent:", err);
+        return res.status(500).json({ message: "Internal server error." });
+      } else if (result) {
+        return res.status(201).json({
+          message: "Comment added successfully.",
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error in commentContent:", error);
     return res.status(500).json({ message: "Internal server error." });
   }
 };
@@ -145,4 +169,5 @@ module.exports = {
   uploadContent,
   uploadVideo,
   likeContent,
+  commentContent,
 };

@@ -66,12 +66,13 @@ const contentCommentTable = `CREATE TABLE IF NOT EXISTS content_comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     content_id INT,
-    parent_id INT DEFAULT NULL,
+    parent_id INT,
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (content_id) REFERENCES content(id)
+    FOREIGN KEY (content_id) REFERENCES content(id),
+    FOREIGN KEY (parent_id) REFERENCES content_comments(id),
   )`;
 
 const contentLikesTable = `CREATE TABLE IF NOT EXISTS content_likes (
