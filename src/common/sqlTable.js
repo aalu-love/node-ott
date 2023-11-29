@@ -25,21 +25,64 @@ const contentTable = `CREATE TABLE IF NOT EXISTS content (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     creator_id INT,
+    viewer_count INT DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (creator_id) REFERENCES users(id)
   )`;
 
-const likeCommentTable = `CREATE TABLE IF NOT EXISTS likes_comments (
+const adminApprovalTable = `CREATE TABLE IF NOT EXISTS admin_approvals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    creator_id INT,
+    admin_id INT,
+    approval_status BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_creator_approval (creator_id), -- Added a unique constraint for each creator
+    FOREIGN KEY (creator_id) REFERENCES users(id),
+    FOREIGN KEY (admin_id) REFERENCES users(id)
+  )`;
+
+const contentVideoTable = `CREATE TABLE IF NOT EXISTS content_videos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  content_id INT,
+  video_id INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (content_id) REFERENCES content(id),
+  FOREIGN KEY (video_id) REFERENCES video_libary(id)
+)`;
+
+const videoLibaryTable = `CREATE TABLE IF NOT EXISTS video_libary (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  video_url VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)`;
+
+const contentCommentTable = `CREATE TABLE IF NOT EXISTS content_comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     content_id INT,
-    like_status BOOLEAN,
+    parent_id INT DEFAULT NULL,
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (content_id) REFERENCES content(id)
+  )`;
+
+const contentLikesTable = `CREATE TABLE IF NOT EXISTS content_likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    content_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (content_id) REFERENCES content(id),
+    CONSTRAINT UNIQUE_KEY UNIQUE (user_id, content_id)
   )`;
 
 const subscriptionPlanTable = `CREATE TABLE IF NOT EXISTS subscription_plans (
@@ -73,17 +116,6 @@ const paymentTransactionTable = `CREATE TABLE IF NOT EXISTS payment_transactions
     FOREIGN KEY (user_id) REFERENCES users(id)
   )`;
 
-const adminApprovalTable = `CREATE TABLE IF NOT EXISTS admin_approvals (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    content_id INT,
-    approval_status BOOLEAN,
-    admin_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (content_id) REFERENCES content(id),
-    FOREIGN KEY (admin_id) REFERENCES users(id)
-  )`;
-
 const rateProposalTable = `CREATE TABLE IF NOT EXISTS rate_proposals (
     id INT AUTO_INCREMENT PRIMARY KEY,
     creator_id INT,
@@ -105,14 +137,17 @@ const creatorCollaborationTable = `CREATE TABLE IF NOT EXISTS creator_collaborat
   )`;
 
 module.exports = {
-	userTable,
-	userProfileTable,
-	contentTable,
-	likeCommentTable,
-	subscriptionPlanTable,
-	userSubscriptionTable,
-	paymentTransactionTable,
-	adminApprovalTable,
-	rateProposalTable,
-	creatorCollaborationTable,
+  userTable,
+  userProfileTable,
+  contentTable,
+  contentVideoTable,
+  videoLibaryTable,
+  contentCommentTable,
+  contentLikesTable,
+  subscriptionPlanTable,
+  userSubscriptionTable,
+  paymentTransactionTable,
+  adminApprovalTable,
+  rateProposalTable,
+  creatorCollaborationTable,
 };
