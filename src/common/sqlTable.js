@@ -131,10 +131,13 @@ const creatorCollaborationTable = `CREATE TABLE IF NOT EXISTS creator_collaborat
     id INT AUTO_INCREMENT PRIMARY KEY,
     creator_id INT,
     collaborator_id INT,
+    content_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (creator_id) REFERENCES users(id),
-    FOREIGN KEY (collaborator_id) REFERENCES users(id)
+    FOREIGN KEY (collaborator_id) REFERENCES users(id),
+    FOREIGN KEY (content_id) REFERENCES content(id),
+    CONSTRAINT UNIQUE_KEY UNIQUE (creator_id, collaborator_id, content_id)
   )`;
 
 module.exports = {

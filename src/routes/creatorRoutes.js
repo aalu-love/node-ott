@@ -6,6 +6,7 @@ const {
   likeContent,
   getContentDetails,
   commentContent,
+  creatorCollaborator,
 } = require("../controller/creatorController");
 const { upload } = require("../common/storageInstance");
 // const { SIGNUP_VALIDATOR, LOGIN_VALIDATOR, isRequestValidated } = require('../config/validator');
@@ -36,5 +37,10 @@ router.post(
 );
 router.post("/like/:content_id", requiredSignin, likeContent);
 router.post("/comment/:content_id", requiredSignin, commentContent);
+router.post(
+  "/content-collabration/:content_id",
+  requiredSignin,
+  creatorCollaborator
+);
 
 module.exports = router;

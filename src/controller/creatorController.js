@@ -164,10 +164,37 @@ const commentContent = async (req, res) => {
   }
 };
 
+const creatorCollaborator = async (req, res) => {
+  try {
+    const { content_id } = req.params;
+    const { _id: user_id } = req.user;
+    const { collaborator_id } = req.body;
+    const query =
+      "INSERT INTO creator_collaborations (creator_id, collaborator_id, content_id) VALUES (?,?,?)";
+    const values = [user_id, Number(collaborator_id), Number(content_id)];
+    await connection.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error in creatorCollaborator:", err);
+        return res.status(500).json({
+          message: "Internal server error.",
+        });
+      } else if (result) {
+        return res.status(201).json({
+          message: "Collaborator added successfully.",
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error in creatorCollaborator:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 module.exports = {
   getContentDetails,
   uploadContent,
   uploadVideo,
   likeContent,
   commentContent,
+  creatorCollaborator,
 };
