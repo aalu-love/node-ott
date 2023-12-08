@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { addPlan, buyPlan } = require("../controller/subscriptionController");
-const { isRequestValidated } = require("../config/validator");
+const { PLAN_VALIDATOR, isRequestValidated } = require("../config/validator");
 const {
   requiredSignin,
   adminMiddleware,
