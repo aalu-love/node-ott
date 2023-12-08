@@ -173,6 +173,11 @@ const creatorCollaborator = async (req, res) => {
       "INSERT INTO creator_collaborations (creator_id, collaborator_id, content_id) VALUES (?,?,?)";
     const values = [user_id, Number(collaborator_id), Number(content_id)];
     await connection.query(query, values, (err, result) => {
+      if (err.code === "ER_DUP_ENTRY") {
+        return res.status(400).json({
+          message: "You have already added this collaborator.",
+        });
+      }
       if (err) {
         console.error("Error in creatorCollaborator:", err);
         return res.status(500).json({
@@ -190,6 +195,54 @@ const creatorCollaborator = async (req, res) => {
   }
 };
 
+const rateProposal = async (req, res) => {
+  try {
+    const { _id: user_id } = req.user;
+    const { proposed_rate } = req.query;
+    const query =
+      "INSERT INTO rate_proposals (creator_id, proposed_rate) VALUES (?,?)";
+    const values = [user_id, Number(proposed_rate)];
+    await connection.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error in rateProposal:", err);
+        return res.status(500).json({ message: "Internal server error." });
+      } else if (result) {
+        return res.status(201).json({
+          message: "Proposal Created",
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error in rateProposal:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+const updateRate = async (req, res) => {
+  try {
+    const { _id: user_id } = req.user;
+    const { status, proposal_id } = req.query;
+    const query =
+      "UPDATE rate_proposals SET status = ? WHERE id = ? AND creator_id = ?";
+    const values = [status, Number(proposal_id), user_id];
+    await connection.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error in updateRate:", err);
+        return res.status(500).json({ message: "Internal server error." });
+      } else if (result.affectedRows == 1) {
+        return res.status(201).json({
+          message: "Rate Updated",
+        });
+      } else {
+        return res.status(404).json({ message: "Proposal not found." });
+      }
+    });
+  } catch (error) {
+    console.error("Error in updateRate:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 module.exports = {
   getContentDetails,
   uploadContent,
@@ -197,4 +250,6 @@ module.exports = {
   likeContent,
   commentContent,
   creatorCollaborator,
+  rateProposal,
+  updateRate,
 };
