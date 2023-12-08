@@ -1,4 +1,4 @@
-const { createConnection } = require("mysql");
+const { createConnection, createPool } = require("mysql");
 const {
   userTable,
   userProfileTable,
@@ -8,15 +8,30 @@ const {
   contentCommentTable,
   contentLikesTable,
   subscriptionPlanTable,
-  userSubscriptionTable,
-  paymentTransactionTable,
   adminApprovalTable,
+  userSubscriptionTable,
+  // paymentTransactionTable,
   rateProposalTable,
   creatorCollaborationTable,
+  userWalletsTable,
+  walletTransactionsTable,
+  topupRequestsTable,
 } = require("../common/sqlTable");
 require("dotenv").config();
 
-const connection = createConnection({
+// Single connection
+// const connection = createConnection({
+//   host: process.env.MYSQL_HOST,
+//   user: process.env.MYSQL_USER,
+//   password: process.env.MYSQL_PASSWORD,
+//   database: process.env.MYSQL_DATABASE,
+//   waitForConnections: true,
+//   connectionLimit: 10,
+//   queueLimit: 0,
+// });
+
+// Connection Pool
+const connection = createPool({
   host: process.env.MYSQL_HOST,
   user: process.env.MYSQL_USER,
   password: process.env.MYSQL_PASSWORD,
@@ -36,11 +51,14 @@ const requiredTables = [
   contentCommentTable,
   contentLikesTable,
   subscriptionPlanTable,
-  userSubscriptionTable,
-  paymentTransactionTable,
   adminApprovalTable,
+  userSubscriptionTable,
+  // paymentTransactionTable,
   rateProposalTable,
   creatorCollaborationTable,
+  userWalletsTable,
+  walletTransactionsTable,
+  topupRequestsTable,
 ];
 
 const createTable = () => {
@@ -62,7 +80,7 @@ const createTable = () => {
 
 const connectDB = () => {
   try {
-    connection.connect((err) => {
+    connection.getConnection((err) => {
       if (err) {
         console.log("Error connecting to MySQL: ", err);
       } else {
@@ -78,4 +96,5 @@ const connectDB = () => {
 module.exports = {
   connectDB,
   connection,
+  // connectionPool,
 };

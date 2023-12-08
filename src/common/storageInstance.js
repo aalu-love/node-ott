@@ -1,4 +1,5 @@
 const multer = require("multer");
+const randomstring = require("randomstring");
 
 // Set up storage for uploaded files
 const storage = multer.diskStorage({
@@ -7,13 +8,13 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     // Truncate the filename to a maximum length (e.g., 50 characters)
-    const originalName = file.originalname;
-    const maxLength = 50;
-    const truncatedName =
-      originalName.length > maxLength
-        ? originalName.substring(0, maxLength)
-        : originalName;
-    cb(null, truncatedName); // Generate unique filenames
+    const { mimetype } = file;
+    const extension = `.${mimetype.split("/")[1]}`;
+    const newname = randomstring.generate(15) + extension;
+    req.file = {
+      newname: newname,
+    };
+    cb(null, newname); // Generate unique filenames
   },
 });
 

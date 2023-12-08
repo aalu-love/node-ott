@@ -6,6 +6,8 @@ const app = express();
 
 const authRoutes = require("./routes/authRoutes");
 const creatorRoutes = require("./routes/creatorRoutes");
+const walletRoutes = require("./routes/walletRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
 
 async function main() {
   // Environment variables
@@ -30,7 +32,7 @@ app.get("/", (req, res, next) => {
 app.use("/auth/v1", [authRoutes]);
 
 //Routes
-app.use("/api/v1", [creatorRoutes]);
+app.use("/api/v1", [creatorRoutes, walletRoutes, subscriptionRoutes]);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

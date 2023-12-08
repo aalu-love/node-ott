@@ -66,13 +66,11 @@ const contentCommentTable = `CREATE TABLE IF NOT EXISTS content_comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     content_id INT,
-    parent_id INT,
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (content_id) REFERENCES content(id),
-    FOREIGN KEY (parent_id) REFERENCES content_comments(id),
+    FOREIGN KEY (content_id) REFERENCES content(id)
   )`;
 
 const contentLikesTable = `CREATE TABLE IF NOT EXISTS content_likes (
@@ -84,47 +82,6 @@ const contentLikesTable = `CREATE TABLE IF NOT EXISTS content_likes (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (content_id) REFERENCES content(id),
     CONSTRAINT UNIQUE_KEY UNIQUE (user_id, content_id)
-  )`;
-
-const subscriptionPlanTable = `CREATE TABLE IF NOT EXISTS subscription_plans (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    duration_months INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-  )`;
-
-const userSubscriptionTable = `CREATE TABLE IF NOT EXISTS user_subscriptions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    subscription_plan_id INT,
-    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    end_date TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (subscription_plan_id) REFERENCES subscription_plans(id)
-  )`;
-
-const paymentTransactionTable = `CREATE TABLE IF NOT EXISTS payment_transactions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    amount DECIMAL(10, 2) NOT NULL,
-    payment_status VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-  )`;
-
-const rateProposalTable = `CREATE TABLE IF NOT EXISTS rate_proposals (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    creator_id INT,
-    proposed_rate DECIMAL(10, 2) NOT NULL,
-    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (creator_id) REFERENCES users(id)
   )`;
 
 const creatorCollaborationTable = `CREATE TABLE IF NOT EXISTS creator_collaborations (
@@ -140,6 +97,82 @@ const creatorCollaborationTable = `CREATE TABLE IF NOT EXISTS creator_collaborat
     CONSTRAINT UNIQUE_KEY UNIQUE (creator_id, collaborator_id, content_id)
   )`;
 
+const userWalletsTable = `CREATE TABLE IF NOT EXISTS user_wallets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNIQUE,
+    balance DECIMAL(10, 2) DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )
+`;
+
+const walletTransactionsTable = `
+  CREATE TABLE IF NOT EXISTS wallet_transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    transaction_type ENUM('credit', 'debit') NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )
+`;
+
+const topupRequestsTable = `
+  CREATE TABLE IF NOT EXISTS topup_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    amount DECIMAL(10, 2) NOT NULL,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )
+`;
+
+const subscriptionPlanTable = `CREATE TABLE IF NOT EXISTS subscription_plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    duration_months INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  )`;
+
+const userSubscriptionTable = `CREATE TABLE IF NOT EXISTS user_subscriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    subscription_plan_id INT,
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    isActive BOOLEAN NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (subscription_plan_id) REFERENCES subscription_plans(id)
+  )`;
+
+// const paymentTransactionTable = `CREATE TABLE IF NOT EXISTS payment_transactions (
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     user_id INT,
+//     amount DECIMAL(10, 2) NOT NULL,
+//     payment_status VARCHAR(255) NOT NULL,
+//     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+//     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+//     FOREIGN KEY (user_id) REFERENCES users(id)
+//   )`;
+
+const rateProposalTable = `CREATE TABLE IF NOT EXISTS rate_proposals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    creator_id INT,
+    proposed_rate DECIMAL(10, 2) NOT NULL,
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (creator_id) REFERENCES users(id)
+  )`;
+
 module.exports = {
   userTable,
   userProfileTable,
@@ -149,9 +182,12 @@ module.exports = {
   contentCommentTable,
   contentLikesTable,
   subscriptionPlanTable,
-  userSubscriptionTable,
-  paymentTransactionTable,
   adminApprovalTable,
+  userSubscriptionTable,
+  // paymentTransactionTable,
   rateProposalTable,
   creatorCollaborationTable,
+  userWalletsTable,
+  walletTransactionsTable,
+  topupRequestsTable,
 };

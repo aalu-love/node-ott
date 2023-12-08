@@ -24,7 +24,7 @@ const requiredSignin = async (req, res, next) => {
 
 const userMiddleware = async (req, res, next) => {
   try {
-    if (req.user.role !== "user") {
+    if (!["creator", "viewer"].includes(req.user.role)) {
       return res
         .status(401)
         .json({ message: "You are not authorized to access this resource" });
